@@ -1,13 +1,10 @@
-import express from "express";
-import * as controller from "../controllers/ejerciciosController.js";
+import { Router } from "express";
+import { getEjercicios, crearEjercicio } from "../controllers/ejercicios.controller.js";
+import { validateEjercicio } from "../middleware/validateEjercicio.js";
 
-const router = express.Router();
+const router = Router();
 
-// GET /api/ejercicios
-router.get("/", controller.listarEjercicios);
+router.get("/", getEjercicios);
+router.post("/", validateEjercicio, crearEjercicio);
 
-// POST /api/ejercicios
-router.post("/", controller.validarYCrearEjercicio);
-
-// (más adelante: PUT, DELETE)
 export default router;
