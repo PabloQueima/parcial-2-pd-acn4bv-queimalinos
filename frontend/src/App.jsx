@@ -1,32 +1,26 @@
-import { useEffect, useState } from "react";
-import { getEjercicios, createEjercicio } from "./services/api";
-import EjerciciosList from "./components/EjerciciosList";
-import EjercicioForm from "./components/EjercicioForm";
+import { Routes, Route, Link } from "react-router-dom";
+
+import EjerciciosPage from "./pages/EjerciciosPage";
+import UsuariosPage from "./pages/UsuariosPage";
+import SesionesPage from "./pages/SesionesPage";
 
 export default function App() {
-  const [ejercicios, setEjercicios] = useState([]);
-
-  useEffect(() => {
-    loadEjercicios();
-  }, []);
-
-  async function loadEjercicios() {
-    const data = await getEjercicios();
-    setEjercicios(data);
-  }
-
-  async function agregarEjercicio(nuevo) {
-    await createEjercicio(nuevo);
-    await loadEjercicios();
-  }
-
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Plataforma de Entrenamiento</h1>
+    <div style={{ padding: 20 }}>
+      <nav style={{ marginBottom: 20 }}>
+        <Link to="/" style={{ marginRight: 10 }}>Home</Link>
+        <Link to="/ejercicios" style={{ marginRight: 10 }}>Ejercicios</Link>
+        <Link to="/usuarios" style={{ marginRight: 10 }}>Usuarios</Link>
+        <Link to="/sesiones">Sesiones</Link>
+      </nav>
 
-      <EjercicioForm onSubmit={agregarEjercicio} />
+      <Routes>
+        <Route path="/" element={<h1>Plataforma de Entrenamiento</h1>} />
 
-      <EjerciciosList ejercicios={ejercicios} />
+        <Route path="/ejercicios" element={<EjerciciosPage />} />
+        <Route path="/usuarios" element={<UsuariosPage />} />
+        <Route path="/sesiones" element={<SesionesPage />} />
+      </Routes>
     </div>
   );
 }
