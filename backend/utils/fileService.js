@@ -5,35 +5,71 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(__dirname, "../data");
 
+const DATA_FILES = [
+  { name: "ejercicios.json", initial: [] },
+  { name: "usuarios.json", initial: [] },
+  { name: "sesiones.json", initial: [] }
+];
+
 export const ensureDataFiles = async () => {
   try {
     await fs.mkdir(dataDir, { recursive: true });
-    const files = [
-      { name: "ejercicios.json", initial: [] },
-      { name: "usuarios.json", initial: [] },
-      { name: "sesiones.json", initial: [] }
-    ];
-    for (const f of files) {
-      const p = path.join(dataDir, f.name);
+
+    for (const file of DATA_FILES) {
+      const filePath = path.join(dataDir, file.name);
+
       try {
-        await fs.access(p);
+        await fs.access(filePath);
       } catch {
-        await fs.writeFile(p, JSON.stringify(f.initial, null, 2), "utf-8");
+        await fs.writeFile(
+          filePath,
+          JSON.stringify(file.initial, null, 2),
+          "utf-8"
+        );
       }
     }
   } catch (err) {
-    console.error("Error creando data files:", err);
+    console.error("[fileService] Error asegurando archivos:", err);
     throw err;
   }
 };
 
 export const readJSON = async (filename) => {
-  const p = path.join(dataDir, filename);
-  const raw = await fs.readFile(p, "utf-8");
-  return JSON.parse(raw);
+  const filePath = path.join(dataDir, filename);
+
+  try {
+    const raw = await fs.readFile(filePath, "utf-8");
+
+    if (!raw.trim()) {
+      await writeJSON(filename, []);
+      return [];
+    }
+
+    return JSON.parse(raw);
+
+  } catch (err) {
+    console.error(`[fileService] Error leyendo ${filename}:`, err);
+
+    if (err instanceof SyntaxError) {
+      await writeJSON(filename, []);
+      return [];
+    }
+
+    throw err;
+  }
 };
 
 export const writeJSON = async (filename, data) => {
-  const p = path.join(dataDir, filename);
-  await fs.writeFile(p, JSON.stringify(data, null, 2), "utf-8");
+  const filePath = path.join(dataDir, filename);
+
+  try {
+    await fs.writeFile(
+      filePath,
+      JSON.stringify(data, null, 2),
+      "utf-8"
+    );
+  } catch (err) {
+    console.error(`[fileService] Error escribiendo ${filename}:`, err);
+    throw err;
+  }
 };
