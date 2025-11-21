@@ -1,41 +1,43 @@
-import { Link, useNavigate } from "react-router-dom";
-import { getCurrentUser, logout } from "../services/authService";
+import { Link } from "react-router-dom";
+import { getCurrentUser, logout } from "../services/auth";
 
-export default function NavBar() {
+export default function Navbar() {
   const user = getCurrentUser();
-  const navigate = useNavigate();
-
-  function handleLogout() {
-    logout();
-    navigate("/login");
-  }
 
   return (
-    <nav style={{ marginBottom: 20 }}>
-      {user ? (
-        <>
-          {user.rol === "admin" && (
-            <Link to="/admin" style={{ marginRight: 10 }}>
-              Usuarios
-            </Link>
-          )}
-
-          {user.rol === "entrenador" && (
-            <Link to="/entrenador" style={{ marginRight: 10 }}>
-              Sesiones
-            </Link>
-          )}
-
-          {user.rol === "cliente" && (
-            <Link to="/cliente" style={{ marginRight: 10 }}>
-              Mis Sesiones
-            </Link>
-          )}
-
-          <button onClick={handleLogout}>Logout</button>
-        </>
-      ) : (
+    <nav style={{ marginBottom: 30 }}>
+      {!user && (
         <Link to="/login">Login</Link>
+      )}
+
+      {user?.rol === "admin" && (
+        <>
+          <Link to="/admin">Panel Administrador</Link>
+        </>
+      )}
+
+      {user?.rol === "entrenador" && (
+        <>
+          <Link to="/entrenador">Panel Entrenador</Link>
+        </>
+      )}
+
+      {user?.rol === "cliente" && (
+        <>
+          <Link to="/cliente">Mis Sesiones</Link>
+        </>
+      )}
+
+      {user && (
+        <button
+          onClick={() => {
+            logout();
+            location.href = "/login";
+          }}
+          style={{ marginLeft: 20 }}
+        >
+          Cerrar sesión
+        </button>
       )}
     </nav>
   );
