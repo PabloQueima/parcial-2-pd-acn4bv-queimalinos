@@ -1,26 +1,73 @@
-import { Routes, Route, Link } from "react-router-dom";
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import { getLoggedUser } from "./services/auth";
 
-import EjerciciosPage from "./pages/EjerciciosPage";
+// Páginas por rol
 import UsuariosPage from "./pages/UsuariosPage";
+import EjerciciosPage from "./pages/EjerciciosPage";
 import SesionesPage from "./pages/SesionesPage";
+import MisSesionesPage from "./pages/MisSesionesPage";
+import Navbar from "./components/Navbar";
 
 export default function App() {
+  const user = getLoggedUser();
+
   return (
-    <div style={{ padding: 20 }}>
-      <nav style={{ marginBottom: 20 }}>
-        <Link to="/" style={{ marginRight: 10 }}>Home</Link>
-        <Link to="/ejercicios" style={{ marginRight: 10 }}>Ejercicios</Link>
-        <Link to="/usuarios" style={{ marginRight: 10 }}>Usuarios</Link>
-        <Link to="/sesiones">Sesiones</Link>
-      </nav>
+    <BrowserRouter>
+      {user && <Navbar user={user} />}
 
       <Routes>
-        <Route path="/" element={<h1>Plataforma de Entrenamiento</h1>} />
+        {/* login */}
+        <Route path="/" element={<LoginPage />} />
 
-        <Route path="/ejercicios" element={<EjerciciosPage />} />
-        <Route path="/usuarios" element={<UsuariosPage />} />
-        <Route path="/sesiones" element={<SesionesPage />} />
+        {/* ADMIN */}
+        <Route
+          path="/admin/usuarios"
+          element={
+            user?.rol === "admin" ? (
+              <UsuariosPage />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        {/* ENTRENADOR */}
+        <Route
+          path="/entrenador/ejercicios"
+          element={
+            user?.rol === "entrenador" ? (
+              <EjerciciosPage />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/entrenador/sesiones"
+          element={
+            user?.rol === "entrenador" ? (
+              <SesionesPage />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        {/* CLIENTE */}
+        <Route
+          path="/cliente/sesiones"
+          element={
+            user?.rol === "cliente" ? (
+              <MisSesionesPage />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
       </Routes>
-    </div>
+    </BrowserRouter>
   );
 }
