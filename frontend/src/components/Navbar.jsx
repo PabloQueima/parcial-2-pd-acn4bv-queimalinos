@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { getCurrentUser, logout } from "../services/auth";
+import { getCurrentUser, logout } from "../services/authService";
 
 export default function Navbar() {
   const user = getCurrentUser();

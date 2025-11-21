@@ -4,9 +4,9 @@ import morgan from "morgan";
 import ejerciciosRouter from "./routes/ejercicios.routes.js";
 import usuariosRouter from "./routes/usuarios.routes.js";
 import sesionesRouter from "./routes/sesiones.routes.js";
-import logger from "./middlewares/logger.js";
+import logger from "./middleware/logger.js";
 import { ensureDataFiles } from "./utils/fileService.js";
-import errorHandler from "./middlewares/errorHandler.js";
+import errorHandler from "./middleware/errorHandler.js";
 import authRoutes from "./routes/authRoutes.js";
 
 
