@@ -1,4 +1,3 @@
-// src/components/SesionForm.jsx
 import { useEffect, useState } from "react";
 import { getUsuarios } from "../services/api";
 import EjercicioSelector from "./EjercicioSelector";

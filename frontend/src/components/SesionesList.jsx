@@ -1,6 +1,4 @@
-// src/components/SesionesList.jsx
 import React from "react";
-
 export default function SesionesList({
   sesiones,
   onEdit,
