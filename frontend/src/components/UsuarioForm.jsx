@@ -3,12 +3,14 @@ import { useState, useEffect } from "react";
 export default function UsuarioForm({ onSubmit, initialData = null }) {
   const [nombre, setNombre] = useState("");
   const [rol, setRol] = useState("cliente");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (initialData) {
       setNombre(initialData.nombre || "");
       setRol(initialData.rol || "cliente");
+      setPassword("");
     }
   }, [initialData]);
 
@@ -21,11 +23,22 @@ export default function UsuarioForm({ onSubmit, initialData = null }) {
       return;
     }
 
+    if (!initialData && !password.trim()) {
+      setError("La contraseña es obligatoria al crear usuario.");
+      return;
+    }
+
     try {
-      await onSubmit({ nombre, rol });
+      await onSubmit({
+        nombre,
+        rol,
+        ...(password.trim() ? { password } : {})
+      });
+
       if (!initialData) {
         setNombre("");
         setRol("cliente");
+        setPassword("");
       }
     } catch (err) {
       setError(err.message);
@@ -48,6 +61,15 @@ export default function UsuarioForm({ onSubmit, initialData = null }) {
           <option value="entrenador">entrenador</option>
           <option value="cliente">cliente</option>
         </select>
+      </div>
+
+      <div>
+        <input
+          placeholder={initialData ? "Nueva contraseña (opcional)" : "Contraseña"}
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
       </div>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
