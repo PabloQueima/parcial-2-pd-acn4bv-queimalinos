@@ -1,3 +1,4 @@
+// src/components/SesionForm.jsx
 import { useEffect, useState } from "react";
 import { getUsuarios } from "../services/api";
 import EjercicioSelector from "./EjercicioSelector";
@@ -34,11 +35,8 @@ export default function SesionForm({ onSubmit, initialData = null }) {
 
   function handleAddEjercicio(item) {
     const exists = ejercicios.find(e => e.id === item.id);
-
     if (exists) {
-      setEjercicios(
-        ejercicios.map(e => (e.id === item.id ? item : e))
-      );
+      setEjercicios(ejercicios.map(e => (e.id === item.id ? item : e)));
     } else {
       setEjercicios([...ejercicios, item]);
     }
@@ -123,10 +121,10 @@ export default function SesionForm({ onSubmit, initialData = null }) {
         </select>
       </div>
 
-      {/* SELECTOR DE EJERCICIOS */}
+      {/* SELECTOR EJERCICIOS */}
       <EjercicioSelector onAdd={handleAddEjercicio} />
 
-      {/* LISTA EJERCICIOS DE LA SESIÓN */}
+      {/* LISTA EJERCICIOS */}
       <div>
         <h4>Ejercicios en la sesión</h4>
 
@@ -139,6 +137,7 @@ export default function SesionForm({ onSubmit, initialData = null }) {
               <button
                 style={{ marginLeft: 10 }}
                 onClick={() => removeEjercicio(e.id)}
+                type="button"
               >
                 Quitar
               </button>

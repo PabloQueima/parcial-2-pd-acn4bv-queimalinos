@@ -1,106 +1,107 @@
+// src/services/api.js
+
 const API_URL = "http://localhost:3000/api";
 
-// ---------------------------
-// Helpers
-// ---------------------------
-async function request(url, options = {}) {
-  const res = await fetch(url, options);
-
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ error: "Error desconocido" }));
-    throw new Error(error.error || "Error en la solicitud");
-  }
-
-  return res.json().catch(() => null);
+// HELPERS
+function buildQuery(params = {}) {
+  const q = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") {
+      q.append(k, v);
+    }
+  });
+  return q.toString() ? `?${q.toString()}` : "";
 }
 
-// ---------------------------
-// Ejercicios
-// ---------------------------
+// ----------------
+// EJERCICIOS
+// ----------------
 export async function getEjercicios(params = {}) {
-  // Permite filtro/búsqueda desde el frontend
-  const query = new URLSearchParams(params).toString();
-  return request(`${API_URL}/ejercicios${query ? `?${query}` : ""}`);
+  const query = buildQuery(params);
+  const res = await fetch(`${API_URL}/ejercicios${query}`);
+  return res.json();
 }
 
 export async function createEjercicio(data) {
-  return request(`${API_URL}/ejercicios`, {
+  const res = await fetch(`${API_URL}/ejercicios`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
+  return res.json();
 }
 
 export async function updateEjercicio(id, data) {
-  return request(`${API_URL}/ejercicios/${id}`, {
+  const res = await fetch(`${API_URL}/ejercicios/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
+  return res.json();
 }
 
 export async function deleteEjercicio(id) {
-  return request(`${API_URL}/ejercicios/${id}`, {
-    method: "DELETE"
-  });
+  await fetch(`${API_URL}/ejercicios/${id}`, { method: "DELETE" });
 }
 
-// ---------------------------
-// Usuarios
-// ---------------------------
-export async function getUsuarios() {
-  return request(`${API_URL}/usuarios`);
-}
-
-export async function createUsuario(data) {
-  return request(`${API_URL}/usuarios`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  });
-}
-
-export async function updateUsuario(id, data) {
-  return request(`${API_URL}/usuarios/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  });
-}
-
-export async function deleteUsuario(id) {
-  return request(`${API_URL}/usuarios/${id}`, {
-    method: "DELETE"
-  });
-}
-
-// ---------------------------
-// Sesiones
-// ---------------------------
+// ----------------
+// SESIONES
+// ----------------
 export async function getSesiones(params = {}) {
-  const query = new URLSearchParams(params).toString();
-  return request(`${API_URL}/sesiones${query ? `?${query}` : ""}`);
+  const query = buildQuery(params);
+  const res = await fetch(`${API_URL}/sesiones${query}`);
+  return res.json();
 }
-
 
 export async function createSesion(data) {
-  return request(`${API_URL}/sesiones`, {
+  const res = await fetch(`${API_URL}/sesiones`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
+  return res.json();
 }
 
 export async function updateSesion(id, data) {
-  return request(`${API_URL}/sesiones/${id}`, {
+  const res = await fetch(`${API_URL}/sesiones/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
+  return res.json();
 }
 
 export async function deleteSesion(id) {
-  return request(`${API_URL}/sesiones/${id}`, {
-    method: "DELETE"
+  await fetch(`${API_URL}/sesiones/${id}`, { method: "DELETE" });
+}
+
+// ----------------
+// USUARIOS
+// ----------------
+export async function getUsuarios(params = {}) {
+  const query = buildQuery(params);
+  const res = await fetch(`${API_URL}/usuarios${query}`);
+  return res.json();
+}
+
+export async function createUsuario(data) {
+  const res = await fetch(`${API_URL}/usuarios`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
   });
+  return res.json();
+}
+
+export async function updateUsuario(id, data) {
+  const res = await fetch(`${API_URL}/usuarios/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+}
+
+export async function deleteUsuario(id) {
+  await fetch(`${API_URL}/usuarios/${id}`, { method: "DELETE" });
 }
