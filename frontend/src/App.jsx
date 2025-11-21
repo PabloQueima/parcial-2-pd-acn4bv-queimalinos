@@ -1,55 +1,42 @@
-import { Routes, Route } from "react-router-dom";
-
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
-import UsuariosPage from "./pages/UsuariosPage";
-import EjerciciosPage from "./pages/EjerciciosPage";
-import SesionesPage from "./pages/SesionesPage";
-import MisSesionesPage from "./pages/MisSesionesPage";
 
-import PrivateRoute from "./components/PrivateRoute";
-import NavBar from "./components/NavBar";
+import DashboardAdmin from "./pages/DashboardAdmin";
+import DashboardEntrenador from "./pages/DashboardEntrenador";
+import DashboardCliente from "./pages/DashboardCliente";
+
+import Navbar from "./components/Navbar";
+import { getCurrentUser } from "./services/auth";
 
 export default function App() {
+  const user = getCurrentUser();
+
   return (
-    <div>
-      <NavBar />
+    <BrowserRouter>
+      <Navbar />
 
       <Routes>
 
+        <Route path="/" element={<Navigate to="/login" />} />
+
         <Route path="/login" element={<LoginPage />} />
 
-        {/* ADMIN */}
         <Route
           path="/admin"
-          element={
-            <PrivateRoute roles={["admin"]}>
-              <UsuariosPage />
-            </PrivateRoute>
-          }
+          element={user?.rol === "admin" ? <DashboardAdmin /> : <Navigate to="/login" />}
         />
 
-        {/* ENTRENADOR */}
         <Route
           path="/entrenador"
-          element={
-            <PrivateRoute roles={["entrenador"]}>
-              <SesionesPage />
-            </PrivateRoute>
-          }
+          element={user?.rol === "entrenador" ? <DashboardEntrenador /> : <Navigate to="/login" />}
         />
 
-        {/* CLIENTE */}
         <Route
           path="/cliente"
-          element={
-            <PrivateRoute roles={["cliente"]}>
-              <MisSesionesPage />
-            </PrivateRoute>
-          }
+          element={user?.rol === "cliente" ? <DashboardCliente /> : <Navigate to="/login" />}
         />
 
-        <Route path="*" element={<LoginPage />} />
       </Routes>
-    </div>
+    </BrowserRouter>
   );
 }
