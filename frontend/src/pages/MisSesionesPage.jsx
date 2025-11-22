@@ -1,24 +1,39 @@
 import { useEffect, useState } from "react";
-import { getSesiones } from "../services/api";
+import { getSesiones, getEjercicios, getUsuarios } from "../services/api";
 import SesionesList from "../components/SesionesList";
 import { getCurrentUser } from "../services/authService";
 
 export default function MisSesionesPage() {
   const user = getCurrentUser();
   const [sesiones, setSesiones] = useState([]);
+  const [ejerciciosMap, setEjerciciosMap] = useState({});
+  const [usuariosMap, setUsuariosMap] = useState({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    cargarMisSesiones();
+    cargarDatos();
   }, []);
 
-  async function cargarMisSesiones() {
+  async function cargarDatos() {
     setLoading(true);
 
     try {
-      const data = await getSesiones({ clienteId: user.id });
-      setSesiones(data || []);
+      const [sesionesData, ejerciciosData, usuariosData] = await Promise.all([
+        getSesiones({ clienteId: user.id }),
+        getEjercicios(),
+        getUsuarios()
+      ]);
+
+      const ejMap = {};
+      ejerciciosData.forEach((e) => (ejMap[e.id] = e));
+
+      const usMap = {};
+      usuariosData.forEach((u) => (usMap[u.id] = u));
+
+      setEjerciciosMap(ejMap);
+      setUsuariosMap(usMap);
+      setSesiones(sesionesData || []);
     } catch (err) {
       console.error("Error cargando sesiones:", err);
       setSesiones([]);
@@ -34,7 +49,13 @@ export default function MisSesionesPage() {
       {loading ? (
         <p>Cargando...</p>
       ) : (
-        <SesionesList sesiones={sesiones} />
+        <SesionesList
+          sesiones={sesiones}
+          ejerciciosMap={ejerciciosMap}
+          usuariosMap={usuariosMap}
+          showAssignInfo={true}
+          showButtons={false} 
+        />
       )}
     </div>
   );
