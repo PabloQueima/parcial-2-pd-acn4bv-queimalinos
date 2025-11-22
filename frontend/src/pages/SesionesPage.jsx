@@ -155,7 +155,7 @@ export default function SesionesPage() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>Gestión de Sesiones</h2>
+      <h2>Crear/Editar Sesiones</h2>
 
       {/* FORM: crea/edita */}
       <div style={{
