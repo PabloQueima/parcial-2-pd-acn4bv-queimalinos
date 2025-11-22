@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
 
 import "./styles/styles.css";
 
@@ -14,50 +13,50 @@ import Navbar from "./components/Navbar";
 import { getCurrentUser } from "./services/authService";
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState(getCurrentUser());
-
-  useEffect(() => {
-    // Observa si el usuario cambia en localStorage (cuando haces login)
-    const interval = setInterval(() => {
-      const stored = getCurrentUser();
-      setCurrentUser(stored);
-    }, 300);
-
-    return () => clearInterval(interval);
-  }, []);
+  const user = getCurrentUser(); // siempre se lee actualizado
 
   return (
     <>
-      <Navbar />
+      {/* Navbar solo si hay usuario */}
+      {user && <Navbar />}
 
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
+
+        {/* Redirección si el usuario ya está logueado */}
+        <Route
+          path="/login"
+          element={
+            user
+              ? <Navigate to={`/${user.rol}`} replace />
+              : <LoginPage />
+          }
+        />
 
         <Route
           path="/admin"
           element={
-            currentUser?.rol === "admin"
+            user?.rol === "admin"
               ? <DashboardAdmin />
-              : <Navigate to="/login" />
+              : <Navigate to="/login" replace />
           }
         />
 
         <Route
           path="/entrenador"
           element={
-            currentUser?.rol === "entrenador"
+            user?.rol === "entrenador"
               ? <DashboardEntrenador />
-              : <Navigate to="/login" />
+              : <Navigate to="/login" replace />
           }
         />
 
         <Route
           path="/cliente"
           element={
-            currentUser?.rol === "cliente"
+            user?.rol === "cliente"
               ? <DashboardCliente />
-              : <Navigate to="/login" />
+              : <Navigate to="/login" replace />
           }
         />
       </Routes>
