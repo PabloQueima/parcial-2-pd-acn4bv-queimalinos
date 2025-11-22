@@ -1,44 +1,41 @@
-import { Link } from "react-router-dom";
 import { getCurrentUser, logout } from "../services/authService";
 
 export default function Navbar() {
   const user = getCurrentUser();
 
+  if (!user) return null;
+
   return (
-    <nav style={{ marginBottom: 30 }}>
-      {!user && (
-        <Link to="/login">Login</Link>
-      )}
+    <nav
+      style={{
+        padding: "15px 25px",
+        background: "#15114D",
+        color: "white",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 30
+      }}
+    >
+      <strong>{user.nombre} – {user.rol.toUpperCase()}</strong>
 
-      {user?.rol === "admin" && (
-        <>
-          <Link to="/admin">Panel Administrador</Link>
-        </>
-      )}
-
-      {user?.rol === "entrenador" && (
-        <>
-          <Link to="/entrenador">Panel Entrenador</Link>
-        </>
-      )}
-
-      {user?.rol === "cliente" && (
-        <>
-          <Link to="/cliente">Mis Sesiones</Link>
-        </>
-      )}
-
-      {user && (
-        <button
-          onClick={() => {
-            logout();
-            location.href = "/login";
-          }}
-          style={{ marginLeft: 20 }}
-        >
-          Cerrar sesión
-        </button>
-      )}
+      <button
+        onClick={() => {
+          logout();
+          location.href = "/login";
+        }}
+        style={{
+          background: "#05A3CB",
+          color: "white",
+          border: "none",
+          padding: "8px 14px",
+          borderRadius: "6px",
+          cursor: "pointer",
+          fontWeight: "bold"
+        }}
+      >
+        Cerrar sesión
+      </button>
     </nav>
   );
 }

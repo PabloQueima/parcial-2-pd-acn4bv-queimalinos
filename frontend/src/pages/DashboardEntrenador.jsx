@@ -1,16 +1,18 @@
-import SesionesPage from "./SesionesPage";
 import EjerciciosPage from "./EjerciciosPage";
+import SesionesPage from "./SesionesPage";
 
 export default function DashboardEntrenador() {
   return (
-    <div>
-      <h1>Panel Entrenador</h1>
+    <div className="container">
+      <div className="panel">
+        <h2>Gestión de Ejercicios</h2>
+        <EjerciciosPage />
+      </div>
 
-      <h2>Gestión de Ejercicios</h2>
-      <EjerciciosPage />
-
-      <h2>Gestión de Sesiones</h2>
-      <SesionesPage />
+      <div className="panel">
+        <h2>Gestión de Sesiones</h2>
+        <SesionesPage />
+      </div>
     </div>
   );
 }

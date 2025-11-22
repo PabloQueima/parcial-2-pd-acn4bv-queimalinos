@@ -22,17 +22,15 @@ export default function LoginPage() {
       // Redireccionar según rol
       switch (user.rol) {
         case "admin":
-          navigate("/admin");
-          break;
+          return navigate("/admin");
         case "entrenador":
-          navigate("/entrenador");
-          break;
+          return navigate("/entrenador");
         case "cliente":
-          navigate("/cliente");
-          break;
+          return navigate("/cliente");
         default:
-          setError("Rol desconocido");
+          return setError("Rol desconocido");
       }
+
     } catch (err) {
       setError(err.response?.data?.error || "Error de login");
     }
