@@ -61,8 +61,6 @@ export default function UsuariosPage() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>Gestión de Usuarios</h2>
-
       <input
         placeholder="Buscar por nombre..."
         value={search}

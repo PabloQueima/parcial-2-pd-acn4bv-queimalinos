@@ -1,6 +1,7 @@
 import UsuariosPage from "./UsuariosPage";
 import { useEffect, useState } from "react";
 import { getUsuarios, getSesiones, getEjercicios } from "../services/api";
+import EjerciciosPage from "./EjerciciosPage";
 
 export default function DashboardAdmin() {
   const [totales, setTotales] = useState({
@@ -38,7 +39,15 @@ export default function DashboardAdmin() {
         <p>Total ejercicios: {totales.ejercicios}</p>
       </div>
 
-      <UsuariosPage />
+      <div style={{ flex: 1 }}>
+          <h2>Gestión de Ejercicios</h2>
+          <EjerciciosPage />
+        </div>
+      
+      <div style={{ flex: 2 }}>
+          <h2>Gestión de Usuarios</h2>
+          <UsuariosPage />
+        </div>
     </div>
   );
 }
