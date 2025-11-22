@@ -11,9 +11,9 @@ function buildQuery(params = {}) {
   return q.toString() ? `?${q.toString()}` : "";
 }
 
-// ----------------
+// --------------------------------------------------------
 // EJERCICIOS
-// ----------------
+// --------------------------------------------------------
 export async function getEjercicios(params = {}) {
   const query = buildQuery(params);
   const res = await fetch(`${API_URL}/ejercicios${query}`);
@@ -42,24 +42,29 @@ export async function deleteEjercicio(id) {
   await fetch(`${API_URL}/ejercicios/${id}`, { method: "DELETE" });
 }
 
-// ----------------
-// SESIONES (CORREGIDO)
-// ----------------
+// --------------------------------------------------------
+// SESIONES – versión original (NO TOCADA)
+// --------------------------------------------------------
 export async function getSesiones(params = {}) {
-
-  // Cliente → usa ruta correcta
   if (params.clienteId) {
     const res = await fetch(`${API_URL}/sesiones/cliente/${params.clienteId}`);
     return res.json();
   }
 
-  // Entrenador → usa ruta correcta
   if (params.entrenadorId) {
     const res = await fetch(`${API_URL}/sesiones/entrenador/${params.entrenadorId}`);
     return res.json();
   }
 
-  // Admin → obtiene todas
+  const res = await fetch(`${API_URL}/sesiones`);
+  return res.json();
+}
+
+// --------------------------------------------------------
+// SESIONES – versión segura que siempre devuelve todas
+// (Usar esta para DashboardAdmin)
+// --------------------------------------------------------
+export async function getSesionesAll() {
   const res = await fetch(`${API_URL}/sesiones`);
   return res.json();
 }
@@ -86,9 +91,9 @@ export async function deleteSesion(id) {
   await fetch(`${API_URL}/sesiones/${id}`, { method: "DELETE" });
 }
 
-// ----------------
+// --------------------------------------------------------
 // USUARIOS
-// ----------------
+// --------------------------------------------------------
 export async function getUsuarios(params = {}) {
   const query = buildQuery(params);
   const res = await fetch(`${API_URL}/usuarios${query}`);
