@@ -3,7 +3,9 @@ import {
   getSesiones,
   createSesion,
   updateSesion,
-  deleteSesion
+  deleteSesion,
+  getUsuarios,
+  getEjercicios
 } from "../services/api";
 
 import SesionForm from "../components/SesionForm";
@@ -13,27 +15,54 @@ export default function SesionesPage() {
   const [sesiones, setSesiones] = useState([]);
   const [editando, setEditando] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // BUSQUEDA + PAGINADO
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 5;
 
-  // ROL ACTUAL
+  const [usuariosMap, setUsuariosMap] = useState({});
+  const [ejerciciosMap, setEjerciciosMap] = useState({});
+
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
   const currentRol = storedUser?.rol || "cliente";
   const currentId = storedUser?.id || null;
 
   useEffect(() => {
+    cargarReferencias();
+  }, []);
+
+  async function cargarReferencias() {
+    try {
+      const [usuarios, ejercicios] = await Promise.all([
+        getUsuarios(),
+        getEjercicios()
+      ]);
+
+      const uMap = {};
+      (usuarios || []).forEach(u => (uMap[u.id] = u));
+
+      const eMap = {};
+      (ejercicios || []).forEach(e => (eMap[e.id] = e));
+
+      setUsuariosMap(uMap);
+      setEjerciciosMap(eMap);
+    } catch (err) {
+      console.error("Error cargando referencias:", err);
+      setUsuariosMap({});
+      setEjerciciosMap({});
+    }
+  }
+
+  useEffect(() => {
     cargarSesiones();
+    setPage(1);
   }, [search]);
 
   async function cargarSesiones() {
     setLoading(true);
-
     try {
       let data;
-
       if (currentRol === "entrenador") {
         data = await getSesiones({ entrenadorId: currentId });
       } else if (currentRol === "cliente") {
@@ -51,7 +80,6 @@ export default function SesionesPage() {
       }
 
       setSesiones(result);
-      setPage(1);
     } catch (err) {
       console.error("Error cargando sesiones:", err);
       setSesiones([]);
@@ -60,49 +88,115 @@ export default function SesionesPage() {
     }
   }
 
+  // Crear sesión
   async function handleCrear(payload) {
-    await createSesion(payload);
-    await cargarSesiones();
+    setSaving(true);
+    try {
+      if (currentRol === "entrenador" && !payload.entrenadorId) {
+        payload.entrenadorId = currentId;
+      }
+      await createSesion(payload);
+      await cargarSesiones();
+      setEditando(null);
+      setPage(1);
+    } catch (err) {
+      console.error("Error creando sesión:", err);
+      throw err;
+    } finally {
+      setSaving(false);
+    }
   }
 
+  // Editar sesión
   async function handleEditar(payload) {
     if (!editando) return;
-    await updateSesion(editando.id, payload);
-    setEditando(null);
-    await cargarSesiones();
+    setSaving(true);
+    try {
+      await updateSesion(editando.id, payload);
+      setEditando(null);
+      await cargarSesiones();
+    } catch (err) {
+      console.error("Error editando sesión:", err);
+      throw err;
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleEliminar(id) {
     if (!confirm("Eliminar sesión?")) return;
-    await deleteSesion(id);
-    await cargarSesiones();
+    try {
+      await deleteSesion(id);
+      const remaining = sesiones.length - 1;
+      const totalPagesAfter = Math.max(1, Math.ceil(remaining / pageSize));
+      if (page > totalPagesAfter) setPage(totalPagesAfter);
+      await cargarSesiones();
+    } catch (err) {
+      console.error("Error eliminando sesión:", err);
+    }
   }
 
   function iniciarEdicion(sesion) {
-    setEditando(sesion);
+    setEditando({
+      ...sesion,
+      clienteId: sesion.clienteId ?? "",
+      entrenadorId: sesion.entrenadorId ?? "",
+      ejercicios: Array.isArray(sesion.ejercicios) ? sesion.ejercicios : []
+    });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  const totalPages = Math.ceil(sesiones.length / pageSize) || 1;
+  function cancelarEdicion() {
+    setEditando(null);
+  }
+
+  const totalPages = Math.max(1, Math.ceil(sesiones.length / pageSize));
   const pageData = sesiones.slice((page - 1) * pageSize, page * pageSize);
 
   return (
-    <div>
+    <div style={{ padding: 20 }}>
       <h2>Gestión de Sesiones</h2>
 
-      <input
-        placeholder="Buscar sesión por título..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        style={{ marginBottom: 20 }}
-      />
-
-      {currentRol !== "cliente" && (
+      {/* FORM: crea/edita */}
+      <div style={{
+        background: "#fff",
+        padding: 16,
+        borderRadius: 8,
+        boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+        marginBottom: 18
+      }}>
         <SesionForm
           onSubmit={editando ? handleEditar : handleCrear}
           initialData={editando}
         />
-      )}
+
+        {editando && (
+          <div style={{ marginTop: 8 }}>
+            <button type="button" onClick={cancelarEdicion} style={{ marginRight: 8 }}>
+              Cancelar edición
+            </button>
+          </div>
+        )}
+
+        {saving && <p style={{ marginTop: 8 }}>Guardando...</p>}
+      </div>
+
+      {/* Buscador */}
+      <div style={{ marginBottom: 12, display: "flex", gap: 8, alignItems: "center" }}>
+        <input
+          placeholder="Buscar sesión por título..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ flex: 1, padding: 8, borderRadius: 6, border: "1px solid #ccc" }}
+        />
+        <button
+          onClick={() => { setSearch(""); setPage(1); }}
+          type="button"
+          style={{ padding: "8px 12px", borderRadius: 6 }}
+        >
+          Limpiar
+        </button>
+      </div>
 
       <hr />
 
@@ -117,23 +211,20 @@ export default function SesionesPage() {
             onEdit={currentRol !== "cliente" ? iniciarEdicion : null}
             onDelete={currentRol !== "cliente" ? handleEliminar : null}
             showAssignInfo={true}
+            showButtons={currentRol !== "cliente"}
+            ejerciciosMap={ejerciciosMap}
+            usuariosMap={usuariosMap}
           />
 
-          <div style={{ marginTop: 10 }}>
-            <button disabled={page <= 1} onClick={() => setPage(page - 1)}>
-              ◀
-            </button>
+          {/* PAGINADOR */}
+          <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8 }}>
+            <button disabled={page <= 1} onClick={() => setPage(1)} type="button">Primera</button>
+            <button disabled={page <= 1} onClick={() => setPage(page - 1)} type="button">◀</button>
 
-            <span style={{ margin: "0 10px" }}>
-              Página {page} / {totalPages}
-            </span>
+            <span> Página {page} de {totalPages} </span>
 
-            <button
-              disabled={page >= totalPages}
-              onClick={() => setPage(page + 1)}
-            >
-              ▶
-            </button>
+            <button disabled={page >= totalPages} onClick={() => setPage(page + 1)} type="button">▶</button>
+            <button disabled={page >= totalPages} onClick={() => setPage(totalPages)} type="button">Última</button>
           </div>
         </>
       )}

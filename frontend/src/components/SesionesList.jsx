@@ -1,9 +1,11 @@
-import React from "react";
 export default function SesionesList({
   sesiones,
   onEdit,
   onDelete,
-  showAssignInfo = true
+  showAssignInfo = true,
+  showButtons = true,
+  ejerciciosMap = {},
+  usuariosMap = {}
 }) {
   if (!sesiones || sesiones.length === 0) {
     return <p>No hay sesiones registradas.</p>;
@@ -12,58 +14,75 @@ export default function SesionesList({
   return (
     <div>
       <ul style={{ padding: 0, listStyle: "none" }}>
-        {sesiones.map((s) => (
-          <li
-            key={s.id}
-            style={{
-              marginBottom: 14,
-              borderBottom: "1px solid #ddd",
-              paddingBottom: 8
-            }}
-          >
-            <strong>{s.titulo}</strong> (ID: {s.id})<br />
+        {sesiones.map((s) => {
+          const cliente = usuariosMap[s.clienteId]?.nombre || `ID ${s.clienteId}`;
+          const entrenador =
+            usuariosMap[s.entrenadorId]?.nombre || `ID ${s.entrenadorId}`;
 
-            <small>
-              Cliente: {s.clienteId || "sin asignar"} — Entrenador:{" "}
-              {s.entrenadorId || "sin asignar"}
-            </small>
+          return (
+            <li
+              key={s.id}
+              style={{
+                marginBottom: 14,
+                borderBottom: "1px solid #ddd",
+                paddingBottom: 8
+              }}
+            >
+              <strong>{s.titulo}</strong> <br />
 
-            {showAssignInfo &&
-              s.ejercicios &&
-              s.ejercicios.length > 0 && (
+              <small>
+                Cliente: <b>{cliente}</b>{" "}
+                — Entrenador: <b>{entrenador}</b>
+              </small>
+
+              {showAssignInfo &&
+                s.ejercicios &&
+                s.ejercicios.length > 0 && (
+                  <div style={{ marginTop: 8 }}>
+                    <em>Ejercicios:</em>
+                    <ul style={{ marginTop: 6 }}>
+                      {s.ejercicios.map((ej) => {
+                        const data = ejerciciosMap[ej.id];
+                        const nombre = data?.nombre || `Ejercicio ${ej.id}`;
+                        const descripcion = data?.descripcion || "";
+
+                        return (
+                          <li key={ej.id}>
+                            <b>{nombre}</b>
+                            {descripcion ? ` — ${descripcion}` : ""}
+                            {" — "}
+                            {ej.series}×{ej.reps}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
+
+              {showButtons && (
                 <div style={{ marginTop: 8 }}>
-                  <em>Ejercicios:</em>
-                  <ul style={{ marginTop: 6 }}>
-                    {s.ejercicios.map((ej) => (
-                      <li key={ej.id}>
-                        Ejercicio {ej.id} — {ej.series}×{ej.reps}
-                      </li>
-                    ))}
-                  </ul>
+                  {onEdit && (
+                    <button
+                      onClick={() => onEdit(s)}
+                      style={{ marginRight: 8 }}
+                    >
+                      Editar
+                    </button>
+                  )}
+
+                  {onDelete && (
+                    <button
+                      onClick={() => onDelete(s.id)}
+                      style={{ marginRight: 8 }}
+                    >
+                      Eliminar
+                    </button>
+                  )}
                 </div>
               )}
-
-            <div style={{ marginTop: 8 }}>
-              {onEdit && (
-                <button
-                  onClick={() => onEdit(s)}
-                  style={{ marginRight: 8 }}
-                >
-                  Editar
-                </button>
-              )}
-
-              {onDelete && (
-                <button
-                  onClick={() => onDelete(s.id)}
-                  style={{ marginRight: 8 }}
-                >
-                  Eliminar
-                </button>
-              )}
-            </div>
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
