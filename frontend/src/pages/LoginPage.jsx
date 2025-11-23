@@ -47,6 +47,11 @@ export default function LoginPage() {
           width: "300px"
         }}
       >
+        <img
+            src="/src/images/logo.png"
+            alt="Logo"
+            style={{ width: "120px", marginBottom: "1rem" }}
+          />
         <h2 style={{ color: "#0C3264", marginBottom: "1.5rem" }}>Login</h2>
 
         <form onSubmit={handleSubmit}>
