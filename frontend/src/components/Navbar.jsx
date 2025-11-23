@@ -17,7 +17,17 @@ export default function Navbar() {
         marginBottom: 30
       }}
     >
-      <strong>{user.nombre} – {user.rol.toUpperCase()}</strong>
+      <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
+        <img
+          src="/src/images/logo.png"
+          alt="Logo"
+          style={{ width: 40, height: 40, borderRadius: 4 }}
+        />
+
+        <strong>
+          {user.nombre} – {user.rol.toUpperCase()}
+        </strong>
+      </div>
 
       <button
         onClick={() => {
