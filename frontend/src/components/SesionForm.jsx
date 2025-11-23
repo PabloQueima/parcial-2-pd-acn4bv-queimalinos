@@ -9,7 +9,6 @@ export default function SesionForm({ onSubmit, initialData = null }) {
   const [ejercicios, setEjercicios] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [todosEjercicios, setTodosEjercicios] = useState([]);
-
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -57,8 +56,10 @@ export default function SesionForm({ onSubmit, initialData = null }) {
     return ej ? ej.nombre : `Ejercicio ${id}`;
   }
 
-  async function handleSubmit(e) {
+  function handleSubmit(e) {
     e.preventDefault();
+    if (e.nativeEvent.submitter?.name !== "submit-btn") return;
+
     setError("");
 
     if (!titulo.trim()) {
@@ -77,22 +78,24 @@ export default function SesionForm({ onSubmit, initialData = null }) {
       ejercicios: ejercicios,
     };
 
-    try {
-      await onSubmit(payload);
-      if (!initialData) {
-        setTitulo("");
-        setClienteId("");
-        setEntrenadorId("");
-        setEjercicios([]);
-      }
-    } catch (err) {
-      setError(err.message);
-    }
+    onSubmit(payload)
+      .then(() => {
+        if (!initialData) {
+          setTitulo("");
+          setClienteId("");
+          setEntrenadorId("");
+          setEjercicios([]);
+        }
+      })
+      .catch((err) => setError(err.message));
   }
 
   return (
     <form
       onSubmit={handleSubmit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") e.preventDefault();
+      }}
       style={{
         marginBottom: 20,
         padding: 15,
@@ -103,6 +106,7 @@ export default function SesionForm({ onSubmit, initialData = null }) {
       }}
     >
       <h3>{initialData ? "Editar Sesión" : "Nueva Sesión"}</h3>
+
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <input
           placeholder="Título de la sesión"
@@ -138,10 +142,8 @@ export default function SesionForm({ onSubmit, initialData = null }) {
         </select>
       </div>
 
-      {/* SELECTOR EJERCICIOS */}
       <EjercicioSelector onAdd={handleAddEjercicio} />
 
-      {/* LISTA EJERCICIOS */}
       <div>
         <h4>Ejercicios en la sesión</h4>
 
@@ -164,6 +166,7 @@ export default function SesionForm({ onSubmit, initialData = null }) {
       </div>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
+
       <div
         style={{
           display: "flex",
@@ -173,6 +176,7 @@ export default function SesionForm({ onSubmit, initialData = null }) {
       >
         <button
           type="submit"
+          name="submit-btn"
           style={{
             padding: "8px 16px",
             fontSize: 16,
