@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   getEjercicios,
   createEjercicio,
@@ -12,9 +12,12 @@ import EjerciciosList from "../components/EjerciciosList";
 export default function EjerciciosPage() {
   const [ejercicios, setEjercicios] = useState([]);
   const [editando, setEditando] = useState(null);
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
 
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const debounceRef = useRef(null);
+
+  const [page, setPage] = useState(1);
   const pageSize = 6;
 
   useEffect(() => {
@@ -29,6 +32,14 @@ export default function EjerciciosPage() {
       console.error("Error cargando ejercicios:", err);
     }
   }
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
+  }, [search]);
 
   async function handleCrear(data) {
     await createEjercicio(data);
@@ -50,13 +61,11 @@ export default function EjerciciosPage() {
     setEditando(ejercicio);
   }
 
-  // FILTRO
   const filtrados = ejercicios.filter(e =>
-    e.nombre.toLowerCase().includes(search.toLowerCase())
+    e.nombre.toLowerCase().includes(debouncedSearch.toLowerCase())
   );
 
-  // PAGINADO
-  const totalPages = Math.ceil(filtrados.length / pageSize);
+  const totalPages = Math.ceil(filtrados.length / pageSize) || 1;
   const inicio = (page - 1) * pageSize;
   const visibles = filtrados.slice(inicio, inicio + pageSize);
 
@@ -64,14 +73,10 @@ export default function EjerciciosPage() {
     <div style={{ padding: 20 }}>
       <h2>Gestión de Ejercicios</h2>
 
-      {/* BUSCADOR */}
       <input
         placeholder="Buscar ejercicio..."
         value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setPage(1);
-        }}
+        onChange={(e) => setSearch(e.target.value)}
         style={{ marginBottom: 15 }}
       />
 
@@ -86,9 +91,8 @@ export default function EjerciciosPage() {
         onDelete={handleEliminar}
       />
 
-      {/* PAGINACIÓN */}
       <div style={{ marginTop: 20 }}>
-        Página {page} de {totalPages || 1}
+        Página {page} de {totalPages}
         <br />
 
         <button disabled={page === 1} onClick={() => setPage(page - 1)}>
@@ -96,7 +100,7 @@ export default function EjerciciosPage() {
         </button>
 
         <button
-          disabled={page === totalPages || totalPages === 0}
+          disabled={page === totalPages}
           onClick={() => setPage(page + 1)}
           style={{ marginLeft: 10 }}
         >

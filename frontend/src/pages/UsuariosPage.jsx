@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   getUsuarios,
   createUsuario,
@@ -12,7 +12,11 @@ import UsuariosList from "../components/UsuariosList";
 export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState([]);
   const [editando, setEditando] = useState(null);
+
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const debounceRef = useRef(null);
+
   const [page, setPage] = useState(1);
   const pageSize = 5;
 
@@ -28,6 +32,14 @@ export default function UsuariosPage() {
       console.error("Error cargando usuarios:", err);
     }
   }
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
+  }, [search]);
 
   async function handleCrear(data) {
     await createUsuario(data);
@@ -49,13 +61,11 @@ export default function UsuariosPage() {
     setEditando(usuario);
   }
 
-  // FILTRO
   const filtrados = usuarios.filter(u =>
-    u.nombre.toLowerCase().includes(search.toLowerCase())
+    u.nombre.toLowerCase().includes(debouncedSearch.toLowerCase())
   );
 
-  // PAGINADO
-  const totalPages = Math.ceil(filtrados.length / pageSize);
+  const totalPages = Math.ceil(filtrados.length / pageSize) || 1;
   const inicio = (page - 1) * pageSize;
   const visibles = filtrados.slice(inicio, inicio + pageSize);
 
@@ -64,10 +74,7 @@ export default function UsuariosPage() {
       <input
         placeholder="Buscar por nombre..."
         value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setPage(1);
-        }}
+        onChange={(e) => setSearch(e.target.value)}
         style={{ marginBottom: 10 }}
       />
 
@@ -82,7 +89,6 @@ export default function UsuariosPage() {
         onDelete={handleEliminar}
       />
 
-      {/* PAGINADO */}
       <div style={{ marginTop: 15 }}>
         Página {page} de {totalPages}
         <br />
