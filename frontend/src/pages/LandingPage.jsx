@@ -5,7 +5,7 @@ export default function LandingPage() {
       <div
         style={{
           background: "url('/src/images/fondo.png') center/cover fixed",
-          height: "100vh",
+          height: "50vh",
           display: "flex",
           justifyContent: "center",
           alignItems: "center"
@@ -47,11 +47,10 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Features Section */}
       <div style={{ padding: "4rem 2rem", textAlign: "center", backgroundColor: "#f5f5f5" }}>
         <h2 style={{ marginBottom: "2rem", color: "#0C3264" }}>¿Qué puedes hacer?</h2>
         <div style={{ display: "flex", justifyContent: "center", gap: "2rem", flexWrap: "wrap" }}>
-          <div style={{ maxWidth: "220px" }}>
+          <div style={{ maxWidth: "440px" }}>
             <img
               src="/src/images/ejercicios.png"
               alt="Ejercicios"
@@ -63,7 +62,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div style={{ maxWidth: "220px" }}>
+          <div style={{ maxWidth: "440px" }}>
             <img
               src="/src/images/sesiones.png"
               alt="Sesiones"
@@ -75,9 +74,9 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div style={{ maxWidth: "220px" }}>
+          <div style={{ maxWidth: "440px" }}>
             <img
-              src="/src/images/usuarios.png"
+              src="/src/images/usuarios.jpg"
               alt="Usuarios"
               style={{ width: "100%", borderRadius: "8px", marginBottom: "1rem" }}
             />
@@ -89,7 +88,6 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Call to Action */}
       <div style={{ textAlign: "center", padding: "3rem 1rem", backgroundColor: "#0C3264", color: "white" }}>
         <h2 style={{ marginBottom: "1rem" }}>Comienza hoy</h2>
         <p style={{ marginBottom: "1.5rem" }}>
