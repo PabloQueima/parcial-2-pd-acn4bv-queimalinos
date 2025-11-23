@@ -49,13 +49,40 @@ export default function MisSesionesPage() {
       {loading ? (
         <p>Cargando...</p>
       ) : (
-        <SesionesList
-          sesiones={sesiones}
-          ejerciciosMap={ejerciciosMap}
-          usuariosMap={usuariosMap}
-          showAssignInfo={true}
-          showButtons={false} 
-        />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: "20px",
+            paddingTop: 10
+          }}
+        >
+          {sesiones.map((s) => (
+            <div
+              key={s.id}
+              style={{
+                padding: 15,
+                border: "1px solid #ccc",
+                borderRadius: 8,
+                background: "#fafafa",
+                display: "flex",
+                flexDirection: "column",
+                gap: 8
+              }}
+            >
+              <div style={{ fontWeight: "bold", fontSize: 18 }}>
+                {s.nombre}
+              </div>
+              <SesionesList
+                sesiones={[s]}
+                usuariosMap={usuariosMap}
+                ejerciciosMap={ejerciciosMap}
+                showAssignInfo={true}
+                showButtons={false}
+              />
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
