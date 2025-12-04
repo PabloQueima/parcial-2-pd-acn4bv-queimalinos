@@ -9,7 +9,6 @@ function buildSesiones(arr) {
 
 export async function listarSesiones(req, res) {
   try {
-    // FIX: reemplaza getAll() inexistente
     const data = await readJSON(FILE);
     let sesiones = buildSesiones(data);
 
