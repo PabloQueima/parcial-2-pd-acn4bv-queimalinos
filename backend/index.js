@@ -12,12 +12,7 @@ import authRoutes from "./routes/authRoutes.js";
 const PORT = process.env.PORT || 3000;
 const app = express();
 
-try {
-  await ensureDataFiles();
-} catch (err) {
-  console.error("Error al inicializar archivos JSON:", err);
-  process.exit(1);
-}
+await ensureDataFiles();
 
 app.use(cors({
   origin: "http://localhost:5173",
@@ -33,7 +28,9 @@ app.use("/api/ejercicios", ejerciciosRouter);
 app.use("/api/usuarios", usuariosRouter);
 app.use("/api/sesiones", sesionesRouter);
 
-app.get("/health", (req, res) => res.json({ ok: true, time: new Date().toISOString() }));
+app.get("/health", (req, res) =>
+  res.json({ ok: true, time: new Date().toISOString() })
+);
 
 app.use(errorHandler);
 

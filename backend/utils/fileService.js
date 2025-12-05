@@ -1,70 +1,56 @@
 import { db } from "../firebase.js";
 
-/**
- * Mapea los nombres de archivos a colecciones de Firestore
- */
 const COLLECTION_MAP = {
   "usuarios.json": "usuarios",
   "ejercicios.json": "ejercicios",
   "sesiones.json": "sesiones"
 };
 
-/**
- * Ya no se necesitan archivos físicos.
- */
 export const ensureDataFiles = async () => {
-  console.log("[fileService] Firebase mode: no local files needed.");
+  console.log("[fileService] Modo Firestore: no se requieren archivos locales.");
 };
 
-/**
- * Lee desde Firestore en vez de JSON local
- */
 export const readJSON = async (filename) => {
   const collectionName = COLLECTION_MAP[filename];
-
   if (!collectionName) {
-    throw new Error(`No se encuentra la colección para: ${filename}`);
+    throw new Error(`No existe la colección asociada a: ${filename}`);
   }
 
   try {
     const snap = await db.collection(collectionName).get();
-    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return snap.docs.map(doc => doc.data());
 
   } catch (err) {
-    console.error(`[fileService] Error leyendo Firestore (${collectionName}):`, err);
+    console.error(`[fileService] Error leyendo colección ${collectionName}:`, err);
     throw err;
   }
 };
 
-/**
- * Escribe un array completo en Firestore (sobrescribe la colección)
- */
+
 export const writeJSON = async (filename, data) => {
   const collectionName = COLLECTION_MAP[filename];
-
   if (!collectionName) {
-    throw new Error(`No se encuentra la colección para: ${filename}`);
+    throw new Error(`No existe la colección asociada a: ${filename}`);
   }
 
   if (!Array.isArray(data)) {
-    throw new Error(`writeJSON requiere un array. Recibido: ${typeof data}`);
+    throw new Error(`writeJSON requiere un array, recibido: ${typeof data}`);
   }
 
   try {
-    // 1. Borrar colección actual
     const snap = await db.collection(collectionName).get();
     const batchDelete = db.batch();
 
-    snap.forEach((doc) => batchDelete.delete(doc.ref));
-
+    snap.forEach(doc => batchDelete.delete(doc.ref));
     await batchDelete.commit();
 
-    // 2. Escribir nueva data
     const batchWrite = db.batch();
+    const col = db.collection(collectionName);
 
-    data.forEach((item) => {
-      const ref = db.collection(collectionName).doc(item.id || undefined);
-      batchWrite.set(ref, item);
+    data.forEach(item => {
+      const docRef = col.doc(String(item.id));
+
+      batchWrite.set(docRef, item);
     });
 
     await batchWrite.commit();
@@ -72,7 +58,7 @@ export const writeJSON = async (filename, data) => {
     console.log(`[fileService] Firestore actualizado: ${collectionName}`);
 
   } catch (err) {
-    console.error(`[fileService] Error escribiendo Firestore (${collectionName}):`, err);
+    console.error(`[fileService] Error escribiendo colección ${collectionName}:`, err);
     throw err;
   }
 };
