@@ -1,13 +1,4 @@
 export default class Sesion {
-  /**
-   * @param {number} id
-   * @param {string} titulo
-   * @param {Array<{id:number, series:number, reps:number}>} ejercicios
-   * @param {number} clienteId
-   * @param {number|null} entrenadorId
-   * @param {string} createdAt
-   * @param {string|null} updatedAt
-   */
   constructor(
     id,
     titulo,
@@ -19,9 +10,12 @@ export default class Sesion {
   ) {
     this.id = Number(id);
     this.titulo = String(titulo || "").trim();
+
     this.ejercicios = Array.isArray(ejercicios) ? ejercicios : [];
+
     this.clienteId = Number(clienteId);
     this.entrenadorId = entrenadorId !== null ? Number(entrenadorId) : null;
+
     this.createdAt = createdAt || new Date().toISOString();
     this.updatedAt = updatedAt || null;
   }
@@ -62,7 +56,7 @@ export default class Sesion {
     return new Sesion(
       obj.id,
       obj.titulo,
-      obj.ejercicios,
+      Array.isArray(obj.ejercicios) ? obj.ejercicios : [],
       obj.clienteId,
       obj.entrenadorId,
       obj.createdAt,

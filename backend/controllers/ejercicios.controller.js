@@ -1,15 +1,18 @@
-import { readJSON, writeJSON } from "../utils/fileService.js";
+import { db } from "../firebase.js";
 import Ejercicio from "../models/Ejercicio.js";
 
-const FILE = "ejercicios.json";
+// Colección Firestore
+const COL = "ejercicios";
 
 export async function listarEjercicios(req, res) {
   try {
-    const data = await readJSON(FILE);
-    const ejercicios = data.map(e => Ejercicio.fromJSON(e));
-    res.json(ejercicios.map(e => e.toJSON()));
+    const snap = await db.collection(COL).get();
+    const ejercicios = snap.docs.map(doc =>
+      Ejercicio.fromJSON(doc.data()).toJSON()
+    );
+    return res.json(ejercicios);
   } catch (err) {
-    console.error(err);
+    console.error("Error listando ejercicios:", err);
     res.status(500).json({ error: "No se pudieron leer ejercicios" });
   }
 }
@@ -17,8 +20,6 @@ export async function listarEjercicios(req, res) {
 export async function crearEjercicio(req, res) {
   try {
     const { nombre, descripcion, parteCuerpo, elemento } = req.body;
-
-    const data = await readJSON(FILE);
 
     const nuevo = new Ejercicio(
       Date.now(),
@@ -28,58 +29,53 @@ export async function crearEjercicio(req, res) {
       elemento
     );
 
-    data.push(nuevo.toJSON());
-    await writeJSON(FILE, data);
+    await db.collection(COL).doc(String(nuevo.id)).set(nuevo.toJSON());
 
-    res.status(201).json(nuevo.toJSON());
+    return res.status(201).json(nuevo.toJSON());
   } catch (err) {
-    console.error(err);
+    console.error("Error creando ejercicio:", err);
     res.status(500).json({ error: "No se pudo crear ejercicio" });
   }
 }
 
 export async function actualizarEjercicio(req, res) {
   try {
-    const id = Number(req.params.id);
-    const data = await readJSON(FILE);
-    let ejercicios = data.map(e => Ejercicio.fromJSON(e));
+    const id = String(req.params.id);
+    const ref = db.collection(COL).doc(id);
+    const snap = await ref.get();
 
-    const idx = ejercicios.findIndex(e => e.id === id);
-    if (idx === -1) return res.status(404).json({ error: "Ejercicio no encontrado" });
+    if (!snap.exists) {
+      return res.status(404).json({ error: "Ejercicio no encontrado" });
+    }
+
+    const data = snap.data();
+    const ejercicio = Ejercicio.fromJSON(data);
 
     const { nombre, descripcion, parteCuerpo, elemento } = req.body;
-    const ejercicio = ejercicios[idx];
 
     if (nombre !== undefined) ejercicio.nombre = nombre.trim();
     if (descripcion !== undefined) ejercicio.descripcion = descripcion.trim();
-    if (parteCuerpo !== undefined) ejercicio.parteCuerpo = parteCuerpo.trim().toLowerCase();
-    if (elemento !== undefined) ejercicio.elemento = elemento.trim().toLowerCase();
+    if (parteCuerpo !== undefined)
+      ejercicio.parteCuerpo = parteCuerpo.trim().toLowerCase();
+    if (elemento !== undefined)
+      ejercicio.elemento = elemento.trim().toLowerCase();
 
-    ejercicios[idx] = ejercicio;
-
-    await writeJSON(FILE, ejercicios.map(e => e.toJSON()));
+    await ref.set(ejercicio.toJSON());
 
     res.json(ejercicio.toJSON());
   } catch (err) {
-    console.error(err);
+    console.error("Error actualizando ejercicio:", err);
     res.status(500).json({ error: "No se pudo actualizar ejercicio" });
   }
 }
 
 export async function eliminarEjercicio(req, res) {
   try {
-    const id = Number(req.params.id);
-    let data = await readJSON(FILE);
-    const exists = data.some(e => Number(e.id) === id);
-
-    if (!exists) return res.status(404).json({ error: "Ejercicio no encontrado" });
-
-    data = data.filter(e => Number(e.id) !== id);
-    await writeJSON(FILE, data);
-
+    const id = String(req.params.id);
+    await db.collection(COL).doc(id).delete();
     res.status(204).end();
   } catch (err) {
-    console.error(err);
+    console.error("Error eliminando ejercicio:", err);
     res.status(500).json({ error: "No se pudo eliminar ejercicio" });
   }
 }
@@ -88,28 +84,28 @@ export async function buscarEjercicios(req, res) {
   try {
     const { parte, search } = req.query;
 
-    const data = await readJSON(FILE);
-    let ejercicios = data.map(e => Ejercicio.fromJSON(e));
+    const snap = await db.collection(COL).get();
+    let ejercicios = snap.docs.map(doc => Ejercicio.fromJSON(doc.data()));
 
-    // Filtro por parte del cuerpo
     if (parte) {
-      const parteLower = parte.toLowerCase();
-      ejercicios = ejercicios.filter(e => e.parteCuerpo.includes(parteLower));
-    }
-
-    // Búsqueda por texto
-    if (search) {
-      const term = search.toLowerCase();
+      const p = parte.toLowerCase();
       ejercicios = ejercicios.filter(e =>
-        e.nombre.toLowerCase().includes(term) ||
-        e.descripcion.toLowerCase().includes(term)
+        e.parteCuerpo.toLowerCase().includes(p)
       );
     }
 
-    res.json(ejercicios.map(e => e.toJSON()));
+    if (search) {
+      const term = search.toLowerCase();
+      ejercicios = ejercicios.filter(
+        e =>
+          e.nombre.toLowerCase().includes(term) ||
+          e.descripcion.toLowerCase().includes(term)
+      );
+    }
 
+    return res.json(ejercicios.map(e => e.toJSON()));
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al filtrar/buscar ejercicios" });
+    console.error("Error buscando ejercicios:", err);
+    res.status(500).json({ error: "Error buscando ejercicios" });
   }
 }

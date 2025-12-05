@@ -1,28 +1,29 @@
-import { readJSON, writeJSON } from "../utils/fileService.js";
+import { db } from "../firebase.js";
 import Usuario from "../models/Usuario.js";
 import bcrypt from "bcrypt";
 
-const FILE = "usuarios.json";
+const COL = "usuarios";
 
-function buildUsuarios(arr) {
-  return arr.map(u => Usuario.fromJSON(u));
+function buildUsuarios(docs) {
+  return docs.map(doc => Usuario.fromJSON(doc.data()));
 }
 
 export async function listarUsuarios(req, res) {
   try {
     const { rol } = req.query;
 
-    const data = await readJSON(FILE);
-    let usuarios = buildUsuarios(data);
+    const snap = await db.collection(COL).get();
+    let usuarios = buildUsuarios(snap.docs);
 
     if (rol) {
-      const rolLower = rol.toLowerCase();
-      usuarios = usuarios.filter(u => u.rol === rolLower);
+      usuarios = usuarios.filter(
+        u => u.rol.toLowerCase() === rol.toLowerCase()
+      );
     }
 
-    res.json(usuarios.map(u => u.toJSON()));
+    return res.json(usuarios.map(u => u.toJSON()));
   } catch (err) {
-    console.error(err);
+    console.error("Error listando usuarios:", err);
     res.status(500).json({ error: "No se pudieron leer usuarios" });
   }
 }
@@ -37,18 +38,14 @@ export async function crearUsuario(req, res) {
       });
     }
 
-    const data = await readJSON(FILE);
-
-    // HASH DE CONTRASEÑA
+    // Hash de contraseña
     const hash = await bcrypt.hash(password, 10);
 
     const nuevo = new Usuario(Date.now(), nombre, rol, hash);
 
-    data.push(nuevo.toJSON());
-    await writeJSON(FILE, data);
+    await db.collection(COL).doc(String(nuevo.id)).set(nuevo.toJSON());
 
     return res.status(201).json(nuevo.toJSON());
-
   } catch (err) {
     console.error("Error creando usuario:", err);
     res.status(500).json({ error: "No se pudo crear usuario" });
@@ -60,32 +57,27 @@ export async function actualizarUsuario(req, res) {
     const { id } = req.params;
     const { nombre, rol, password } = req.body;
 
-    const data = await readJSON(FILE);
-    const index = data.findIndex(u => String(u.id) === String(id));
+    const ref = db.collection(COL).doc(String(id));
+    const snap = await ref.get();
 
-    if (index === -1) {
+    if (!snap.exists) {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
 
-    // Clon del usuario existente
-    const usuarioActual = Usuario.fromJSON(data[index]);
+    const usuarioActual = Usuario.fromJSON(snap.data());
 
-    // Actualizaciones de campos básicos
+    // Actualizaciones
     if (nombre !== undefined) usuarioActual.nombre = nombre.trim();
     if (rol !== undefined) usuarioActual.rol = rol.toLowerCase();
 
-    // Si se envía una nueva contraseña, la re-hasheamos
+    // Rehash si viene nueva contraseña
     if (password !== undefined) {
-      const hash = await bcrypt.hash(password, 10);
-      usuarioActual.passwordHash = hash;
+      usuarioActual.passwordHash = await bcrypt.hash(password, 10);
     }
 
-    // Guardamos el usuario actualizado
-    data[index] = usuarioActual.toJSON();
-    await writeJSON(FILE, data);
+    await ref.set(usuarioActual.toJSON());
 
-    res.json(usuarioActual.toJSON());
-
+    return res.json(usuarioActual.toJSON());
   } catch (err) {
     console.error("Error actualizando usuario:", err);
     res.status(500).json({ error: "No se pudo actualizar usuario" });
@@ -94,19 +86,20 @@ export async function actualizarUsuario(req, res) {
 
 export async function eliminarUsuario(req, res) {
   try {
-    const id = Number(req.params.id);
+    const id = String(req.params.id);
 
-    let data = await readJSON(FILE);
-    const exists = data.some(u => Number(u.id) === id);
-    if (!exists) return res.status(404).json({ error: "Usuario no encontrado" });
+    const ref = db.collection(COL).doc(id);
+    const snap = await ref.get();
 
-    data = data.filter(u => Number(u.id) !== id);
-    await writeJSON(FILE, data);
+    if (!snap.exists) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
 
-    res.status(204).end();
+    await ref.delete();
 
+    return res.status(204).end();
   } catch (err) {
-    console.error(err);
+    console.error("Error eliminando usuario:", err);
     res.status(500).json({ error: "No se pudo eliminar usuario" });
   }
 }
