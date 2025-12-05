@@ -4,15 +4,16 @@ export async function validateSesion(req, res, next) {
   try {
     const { titulo, clienteId, entrenadorId, ejercicios } = req.body;
 
+    // ===== VALIDAR TITULO =====
     if (!titulo || typeof titulo !== "string" || !titulo.trim()) {
       return res.status(400).json({ error: "El campo 'titulo' es obligatorio y debe ser texto." });
     }
 
+    // ===== VALIDAR CLIENTE =====
     if (!clienteId) {
       return res.status(400).json({ error: "El campo 'clienteId' es obligatorio." });
     }
 
-    // ===== VALIDAR CLIENTE =====
     const clienteSnap = await db
       .collection("usuarios")
       .where("id", "==", Number(clienteId))
@@ -74,7 +75,7 @@ export async function validateSesion(req, res, next) {
     next();
 
   } catch (err) {
-    console.error(err);
+    console.error("validateSesion ERROR:", err);
     return res.status(500).json({ error: "Error validando sesión" });
   }
 }
