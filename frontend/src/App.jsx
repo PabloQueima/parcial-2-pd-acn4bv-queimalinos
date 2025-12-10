@@ -8,17 +8,18 @@ import DashboardCliente from "./pages/DashboardCliente";
 
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer"; // <- agregado
+import Footer from "./components/Footer";
+
 import { getCurrentUser } from "./services/authService";
 
 export default function App() {
-  const user = getCurrentUser(); // siempre se lee actualizado
+  const user = getCurrentUser();
 
   return (
     <>
-      {/* Navbar solo si hay usuario */}
       {user && <Navbar />}
 
       <Routes>
@@ -30,6 +31,15 @@ export default function App() {
             user
               ? <Navigate to={`/${user.rol}`} replace />
               : <LoginPage />
+          }
+        />
+
+        <Route
+          path="/register"
+          element={
+            user
+              ? <Navigate to={`/${user.rol}`} replace />
+              : <RegisterPage />
           }
         />
 
@@ -60,6 +70,7 @@ export default function App() {
           }
         />
       </Routes>
+
       <Footer />
     </>
   );

@@ -31,6 +31,8 @@ export default function LandingPage() {
           <p style={{ marginBottom: "1.5rem", color: "#15114D" }}>
             Gestiona tus entrenamientos, clases y ejercicios de manera simple y eficiente.
           </p>
+
+          {/* Botón Login */}
           <button
             onClick={() => (window.location.href = "/login")}
             style={{
@@ -39,17 +41,35 @@ export default function LandingPage() {
               border: "none",
               color: "white",
               borderRadius: "6px",
-              cursor: "pointer"
+              cursor: "pointer",
+              marginRight: "10px"
             }}
           >
             Ingresar
           </button>
+
+          {/* Botón Register */}
+          <button
+            onClick={() => (window.location.href = "/register")}
+            style={{
+              padding: "0.8rem 1.5rem",
+              backgroundColor: "#15114D",
+              border: "none",
+              color: "white",
+              borderRadius: "6px",
+              cursor: "pointer"
+            }}
+          >
+            Registrarse
+          </button>
         </div>
       </div>
 
+      {/* Sección contenido */}
       <div style={{ padding: "4rem 2rem", textAlign: "center", backgroundColor: "#f5f5f5" }}>
         <h2 style={{ marginBottom: "2rem", color: "#0C3264" }}>¿Qué puedes hacer?</h2>
         <div style={{ display: "flex", justifyContent: "center", gap: "2rem", flexWrap: "wrap" }}>
+          
           <div style={{ maxWidth: "440px" }}>
             <img
               src="/src/images/ejercicios.png"
@@ -85,16 +105,20 @@ export default function LandingPage() {
               Administra clientes, entrenadores y todo tu equipo en un solo lugar.
             </p>
           </div>
+
         </div>
       </div>
 
+      {/* CTA Final */}
       <div style={{ textAlign: "center", padding: "3rem 1rem", backgroundColor: "#0C3264", color: "white" }}>
         <h2 style={{ marginBottom: "1rem" }}>Comienza hoy</h2>
         <p style={{ marginBottom: "1.5rem" }}>
           Regístrate y lleva tu entrenamiento al siguiente nivel.
         </p>
+
+        {/* Botón Register final */}
         <button
-          onClick={() => (window.location.href = "/login")}
+          onClick={() => (window.location.href = "/register")}
           style={{
             padding: "0.8rem 1.5rem",
             backgroundColor: "#05A3CB",
@@ -104,7 +128,7 @@ export default function LandingPage() {
             cursor: "pointer"
           }}
         >
-          Ingresar
+          Registrarse
         </button>
       </div>
     </div>
