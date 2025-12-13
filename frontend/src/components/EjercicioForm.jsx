@@ -5,6 +5,7 @@ export default function EjercicioForm({ onSubmit, initialData }) {
   const [descripcion, setDescripcion] = useState("");
   const [parteCuerpo, setParteCuerpo] = useState("");
   const [elemento, setElemento] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
     if (initialData) {
@@ -12,6 +13,7 @@ export default function EjercicioForm({ onSubmit, initialData }) {
       setDescripcion(initialData.descripcion || "");
       setParteCuerpo(initialData.parteCuerpo || "");
       setElemento(initialData.elemento || "");
+      setImageUrl(initialData.imageUrl || "");
     }
   }, [initialData]);
 
@@ -22,7 +24,8 @@ export default function EjercicioForm({ onSubmit, initialData }) {
       nombre,
       descripcion,
       parteCuerpo,
-      elemento
+      elemento,
+      imageUrl
     });
 
     if (!initialData) {
@@ -30,6 +33,7 @@ export default function EjercicioForm({ onSubmit, initialData }) {
       setDescripcion("");
       setParteCuerpo("");
       setElemento("");
+      setImageUrl("");
     }
   }
 
@@ -49,31 +53,33 @@ export default function EjercicioForm({ onSubmit, initialData }) {
         placeholder="Nombre"
         value={nombre}
         onChange={(e) => setNombre(e.target.value)}
-        style={{ padding: 6 }}
       />
 
       <textarea
         placeholder="Descripción"
         value={descripcion}
         onChange={(e) => setDescripcion(e.target.value)}
-        style={{ padding: 6 }}
       />
 
       <input
         placeholder="Parte del cuerpo"
         value={parteCuerpo}
         onChange={(e) => setParteCuerpo(e.target.value)}
-        style={{ padding: 6 }}
       />
 
       <input
         placeholder="Elemento usado (opcional)"
         value={elemento}
         onChange={(e) => setElemento(e.target.value)}
-        style={{ padding: 6 }}
       />
 
-      <button type="submit" style={{ marginTop: 10 }}>
+      <input
+        placeholder="URL de imagen (opcional)"
+        value={imageUrl}
+        onChange={(e) => setImageUrl(e.target.value)}
+      />
+
+      <button type="submit">
         {initialData ? "Guardar Cambios" : "Crear Ejercicio"}
       </button>
     </form>

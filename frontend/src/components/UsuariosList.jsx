@@ -15,6 +15,8 @@ export default function UsuariosList({ usuarios, onEdit, onDelete }) {
           <div>
             <strong>{u.nombre}</strong>
             <br />
+            <small>{u.email}</small>
+            <br />
             <small>Rol: {u.rol}</small>
           </div>
 

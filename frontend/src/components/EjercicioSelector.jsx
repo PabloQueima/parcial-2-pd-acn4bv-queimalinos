@@ -29,6 +29,7 @@ export default function EjercicioSelector({ onAdd }) {
     setLoading(true);
     const data = await getEjercicios();
     const f = debouncedSearch.trim().toLowerCase();
+
     const filtrado = f
       ? data.filter(
           (e) =>
@@ -37,6 +38,7 @@ export default function EjercicioSelector({ onAdd }) {
             e.parteCuerpo.toLowerCase().includes(f)
         )
       : data;
+
     setEjercicios(filtrado);
     setPage(1);
     setLoading(false);
@@ -61,11 +63,7 @@ export default function EjercicioSelector({ onAdd }) {
         placeholder="Buscar ejercicio..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        style={{
-          marginBottom: 10,
-          width: "300px",
-          maxWidth: "100%"
-        }}
+        style={{ marginBottom: 10, width: "300px" }}
       />
 
       {loading ? (
@@ -74,75 +72,44 @@ export default function EjercicioSelector({ onAdd }) {
         <>
           <ul style={{ padding: 0, listStyle: "none" }}>
             {pageData.map((e) => (
-              <li
-                key={e.id}
-                style={{
-                  padding: "8px 0",
-                  borderBottom: "1px solid #eee"
-                }}
-              >
-                <div style={{ display: "block" }}>
-                  <strong>{e.nombre}</strong>
-                </div>
-                <div style={{ display: "block" }}>
-                  <small>{e.descripcion}</small>
-                </div>
-                <div style={{ display: "block" }}>
-                  <small>Parte del cuerpo: {e.parteCuerpo}</small>
-                </div>
-                <div style={{ display: "block" }}>
-                  <small>Elemento: {e.elemento || "Ninguno"}</small>
-                </div>
+              <li key={e.id} style={{ padding: "8px 0", borderBottom: "1px solid #eee" }}>
+                <strong>{e.nombre}</strong>
+                <div><small>{e.descripcion}</small></div>
+                <div><small>Parte del cuerpo: {e.parteCuerpo}</small></div>
+                <div><small>Elemento: {e.elemento || "Ninguno"}</small></div>
 
-                <div style={{ marginTop: 5 }}>
-                  <button
-                    type="button"
-                    onClick={() => handleAdd(e)}
-                    style={{ marginTop: 5 }}
-                  >
-                    Agregar
-                  </button>
-                </div>
+                {e.imageUrl && (
+                  <div>
+                    <a href={e.imageUrl} target="_blank" rel="noreferrer">
+                      Ver imagen
+                    </a>
+                  </div>
+                )}
+
+                <button onClick={() => handleAdd(e)} style={{ marginTop: 5 }}>
+                  Agregar
+                </button>
               </li>
             ))}
             {pageData.length === 0 && <p>No se encontraron ejercicios.</p>}
           </ul>
 
           <div style={{ margin: "10px 0" }}>
-            <button disabled={page <= 1} onClick={() => setPage(page - 1)}>
-              ◀
-            </button>
+            <button disabled={page <= 1} onClick={() => setPage(page - 1)}>◀</button>
             <span style={{ margin: "0 10px" }}>
               Página {page} / {totalPages}
             </span>
-            <button
-              disabled={page >= totalPages}
-              onClick={() => setPage(page + 1)}
-            >
-              ▶
-            </button>
+            <button disabled={page >= totalPages} onClick={() => setPage(page + 1)}>▶</button>
           </div>
 
           <div style={{ marginTop: 10 }}>
             <label>
               Series:
-              <input
-                type="number"
-                min="1"
-                value={series}
-                onChange={(e) => setSeries(e.target.value)}
-                style={{ width: 60, marginLeft: 5 }}
-              />
+              <input type="number" min="1" value={series} onChange={(e) => setSeries(e.target.value)} />
             </label>
             <label style={{ marginLeft: 10 }}>
               Reps:
-              <input
-                type="number"
-                min="1"
-                value={reps}
-                onChange={(e) => setReps(e.target.value)}
-                style={{ width: 60, marginLeft: 5 }}
-              />
+              <input type="number" min="1" value={reps} onChange={(e) => setReps(e.target.value)} />
             </label>
           </div>
         </>
