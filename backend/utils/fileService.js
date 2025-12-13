@@ -7,7 +7,7 @@ const COLLECTION_MAP = {
 };
 
 export const ensureDataFiles = async () => {
-  console.log("[fileService] Modo Firestore: no se requieren archivos locales.");
+  return;
 };
 
 export const readJSON = async (filename) => {
@@ -16,16 +16,9 @@ export const readJSON = async (filename) => {
     throw new Error(`No existe la colección asociada a: ${filename}`);
   }
 
-  try {
-    const snap = await db.collection(collectionName).get();
-    return snap.docs.map(doc => doc.data());
-
-  } catch (err) {
-    console.error(`[fileService] Error leyendo colección ${collectionName}:`, err);
-    throw err;
-  }
+  const snap = await db.collection(collectionName).get();
+  return snap.docs.map(doc => doc.data());
 };
-
 
 export const writeJSON = async (filename, data) => {
   const collectionName = COLLECTION_MAP[filename];
@@ -34,31 +27,22 @@ export const writeJSON = async (filename, data) => {
   }
 
   if (!Array.isArray(data)) {
-    throw new Error(`writeJSON requiere un array, recibido: ${typeof data}`);
+    throw new Error("writeJSON requiere un array");
   }
 
-  try {
-    const snap = await db.collection(collectionName).get();
-    const batchDelete = db.batch();
+  const snap = await db.collection(collectionName).get();
+  const batchDelete = db.batch();
 
-    snap.forEach(doc => batchDelete.delete(doc.ref));
-    await batchDelete.commit();
+  snap.forEach(doc => batchDelete.delete(doc.ref));
+  await batchDelete.commit();
 
-    const batchWrite = db.batch();
-    const col = db.collection(collectionName);
+  const batchWrite = db.batch();
+  const col = db.collection(collectionName);
 
-    data.forEach(item => {
-      const docRef = col.doc(String(item.id));
+  data.forEach(item => {
+    const docRef = col.doc(String(item.id));
+    batchWrite.set(docRef, item);
+  });
 
-      batchWrite.set(docRef, item);
-    });
-
-    await batchWrite.commit();
-
-    console.log(`[fileService] Firestore actualizado: ${collectionName}`);
-
-  } catch (err) {
-    console.error(`[fileService] Error escribiendo colección ${collectionName}:`, err);
-    throw err;
-  }
+  await batchWrite.commit();
 };

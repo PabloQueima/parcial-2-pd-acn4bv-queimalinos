@@ -23,14 +23,15 @@ export async function listarEjercicios(req, res) {
 
 export async function crearEjercicio(req, res) {
   try {
-    const { nombre, descripcion, parteCuerpo, elemento } = req.body;
+    const { nombre, descripcion, parteCuerpo, elemento, imageUrl } = req.body;
 
     const nuevo = new Ejercicio(
       Date.now(),
       nombre,
       descripcion,
       parteCuerpo,
-      elemento
+      elemento,
+      imageUrl || ""
     );
 
     await db.collection("ejercicios").add(nuevo.toJSON());
@@ -50,12 +51,13 @@ export async function actualizarEjercicio(req, res) {
     if (!result) return res.status(404).json({ error: "Ejercicio no encontrado" });
 
     const { ref, data: ejercicio } = result;
-    const { nombre, descripcion, parteCuerpo, elemento } = req.body;
+    const { nombre, descripcion, parteCuerpo, elemento, imageUrl } = req.body;
 
     if (nombre !== undefined) ejercicio.nombre = nombre.trim();
     if (descripcion !== undefined) ejercicio.descripcion = descripcion.trim();
     if (parteCuerpo !== undefined) ejercicio.parteCuerpo = parteCuerpo.trim().toLowerCase();
     if (elemento !== undefined) ejercicio.elemento = elemento.trim().toLowerCase();
+    if (imageUrl !== undefined) ejercicio.imageUrl = imageUrl.trim();
 
     await ref.update(ejercicio.toJSON());
 
@@ -103,7 +105,6 @@ export async function obtenerEjercicio(req, res) {
     res.status(500).json({ error: "No se pudo obtener ejercicio" });
   }
 }
-
 
 export async function buscarEjercicios(req, res) {
   try {

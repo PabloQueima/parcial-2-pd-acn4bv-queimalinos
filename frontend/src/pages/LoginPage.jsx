@@ -1,26 +1,18 @@
 import { useState } from "react";
 import { login } from "../services/authService";
-import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
-  const [nombre, setNombre] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
 
     try {
-      const user = await login(nombre, password);
-      console.log("Login response:", user);
-
-      setNombre("");
-      setPassword("");
+      const user = await login(email, password);
       window.location.href = `/${user.rol}`;
-      return;
-
     } catch (err) {
       setError(err.response?.data?.error || "Error de login");
     }
@@ -46,17 +38,19 @@ export default function LoginPage() {
         }}
       >
         <img
-            src="/src/images/logo.png"
-            alt="Logo"
-            style={{ width: "120px", marginBottom: "1rem" }}
-          />
+          src="/src/images/logo.png"
+          alt="Logo"
+          style={{ width: "120px", marginBottom: "1rem" }}
+        />
+
         <h2 style={{ color: "#0C3264", marginBottom: "1.5rem" }}>Login</h2>
 
         <form onSubmit={handleSubmit}>
           <input
-            placeholder="Nombre"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
             style={{
               width: "100%",
               padding: "0.6rem",
@@ -70,7 +64,7 @@ export default function LoginPage() {
             type="password"
             placeholder="Contraseña"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
             style={{
               width: "100%",
               padding: "0.6rem",
@@ -80,9 +74,7 @@ export default function LoginPage() {
             }}
           />
 
-          {error && (
-            <p style={{ color: "red", marginBottom: "0.5rem" }}>{error}</p>
-          )}
+          {error && <p style={{ color: "red" }}>{error}</p>}
 
           <button
             type="submit"

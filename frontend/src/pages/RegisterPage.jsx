@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function RegisterPage() {
   const [nombre, setNombre] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
   const navigate = useNavigate();
@@ -12,14 +13,12 @@ export default function RegisterPage() {
     e.preventDefault();
 
     try {
-      await register(nombre, password);
-
+      await register(nombre, email, password);
       setMsg("Usuario registrado correctamente. Ahora podés iniciar sesión.");
 
       setTimeout(() => {
         navigate("/login");
       }, 2000);
-
     } catch (err) {
       setMsg(err.response?.data?.error || "Error al registrarse");
     }
@@ -31,18 +30,20 @@ export default function RegisterPage() {
 
       <form
         onSubmit={handleSubmit}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          width: 300,
-          gap: 15
-        }}
+        style={{ display: "flex", flexDirection: "column", width: 300, gap: 15 }}
       >
         <input
           type="text"
           placeholder="Nombre"
           value={nombre}
           onChange={e => setNombre(e.target.value)}
+        />
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
         />
 
         <input
@@ -55,9 +56,7 @@ export default function RegisterPage() {
         <button type="submit">Crear cuenta</button>
       </form>
 
-      {msg && (
-        <p>{msg}</p>
-      )}
+      {msg && <p>{msg}</p>}
     </div>
   );
 }

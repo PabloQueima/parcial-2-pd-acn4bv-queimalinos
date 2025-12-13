@@ -1,8 +1,12 @@
 export function validateUsuario(req, res, next) {
-  let { nombre, rol, password } = req.body;
+  let { nombre, email, rol, password } = req.body;
 
   if (!nombre || !nombre.trim()) {
     return res.status(400).json({ error: "El campo 'nombre' es obligatorio." });
+  }
+
+  if (!email || typeof email !== "string" || !email.trim()) {
+    return res.status(400).json({ error: "El campo 'email' es obligatorio." });
   }
 
   if (!password || !password.trim()) {

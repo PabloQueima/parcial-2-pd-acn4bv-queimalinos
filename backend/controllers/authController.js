@@ -5,16 +5,17 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET || "supersecreto123";
 
 export async function login(req, res) {
-  const { nombre, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!nombre || !password) {
+  if (!email || !password) {
     return res.status(400).json({ error: "Faltan credenciales" });
   }
 
   try {
     const snap = await db
       .collection("usuarios")
-      .where("nombre", "==", nombre)
+      .where("email", "==", email.trim())
+      .limit(1)
       .get();
 
     if (snap.empty) {
@@ -30,7 +31,7 @@ export async function login(req, res) {
     }
 
     const token = jwt.sign(
-      { id: userId, nombre: rawData.nombre, rol: rawData.rol },
+      { id: userId, email: rawData.email, rol: rawData.rol },
       JWT_SECRET,
       { expiresIn: "4h" }
     );
@@ -39,6 +40,7 @@ export async function login(req, res) {
       user: {
         id: userId,
         nombre: rawData.nombre,
+        email: rawData.email,
         rol: rawData.rol
       },
       token
@@ -52,20 +54,20 @@ export async function login(req, res) {
 
 export async function register(req, res) {
   try {
-    const { nombre, password } = req.body;
+    const { nombre, email, password } = req.body;
 
-    if (!nombre || !password) {
-      return res.status(400).json({ error: "nombre y password son obligatorios" });
+    if (!nombre || !email || !password) {
+      return res.status(400).json({ error: "nombre, email y password son obligatorios" });
     }
 
     const existing = await db
       .collection("usuarios")
-      .where("nombre", "==", nombre.trim())
+      .where("email", "==", email.trim())
       .limit(1)
       .get();
 
     if (!existing.empty) {
-      return res.status(400).json({ error: "El nombre de usuario ya está en uso" });
+      return res.status(400).json({ error: "El email ya está en uso" });
     }
 
     const hash = await bcrypt.hash(password, 10);
@@ -73,6 +75,7 @@ export async function register(req, res) {
     const nuevo = {
       id: Date.now(),
       nombre: nombre.trim(),
+      email: email.trim(),
       rol: "cliente",
       passwordHash: hash
     };
@@ -80,7 +83,7 @@ export async function register(req, res) {
     const ref = await db.collection("usuarios").add(nuevo);
 
     const token = jwt.sign(
-      { id: ref.id, nombre: nuevo.nombre, rol: nuevo.rol },
+      { id: ref.id, email: nuevo.email, rol: nuevo.rol },
       JWT_SECRET,
       { expiresIn: "4h" }
     );
@@ -89,6 +92,7 @@ export async function register(req, res) {
       user: {
         id: ref.id,
         nombre: nuevo.nombre,
+        email: nuevo.email,
         rol: nuevo.rol
       },
       token

@@ -1,10 +1,8 @@
 export function validateEjercicio(req, res, next) {
-  const { nombre, descripcion, parteCuerpo, elemento } = req.body;
+  const { nombre, descripcion, parteCuerpo, elemento, imageUrl } = req.body;
 
   if (!nombre || typeof nombre !== "string" || !nombre.trim()) {
-    return res.status(400).json({
-      error: "El campo 'nombre' es obligatorio y debe ser un texto no vacío."
-    });
+    return res.status(400).json({ error: "El campo 'nombre' es obligatorio." });
   }
 
   if (descripcion !== undefined && typeof descripcion !== "string") {
@@ -17,6 +15,10 @@ export function validateEjercicio(req, res, next) {
 
   if (elemento !== undefined && typeof elemento !== "string") {
     return res.status(400).json({ error: "El campo 'elemento' debe ser texto." });
+  }
+
+  if (imageUrl !== undefined && typeof imageUrl !== "string") {
+    return res.status(400).json({ error: "El campo 'imageUrl' debe ser texto." });
   }
 
   next();

@@ -1,10 +1,19 @@
 export default class Ejercicio {
-  constructor(id, nombre, descripcion = "", parteCuerpo = "", elemento = "", createdAt = null) {
+  constructor(
+    id,
+    nombre,
+    descripcion = "",
+    parteCuerpo = "",
+    elemento = "",
+    imageUrl = "",
+    createdAt = null
+  ) {
     this.id = Number(id);
     this.nombre = String(nombre || "").trim();
     this.descripcion = String(descripcion || "").trim();
     this.parteCuerpo = String(parteCuerpo || "").toLowerCase();
     this.elemento = String(elemento || "").toLowerCase();
+    this.imageUrl = String(imageUrl || "").trim();
     this.createdAt = createdAt || new Date().toISOString();
   }
 
@@ -15,6 +24,7 @@ export default class Ejercicio {
       descripcion: this.descripcion,
       parteCuerpo: this.parteCuerpo,
       elemento: this.elemento,
+      imageUrl: this.imageUrl,
       createdAt: this.createdAt
     };
   }
@@ -27,6 +37,7 @@ export default class Ejercicio {
       obj.descripcion,
       obj.parteCuerpo,
       obj.elemento,
+      obj.imageUrl,
       obj.createdAt
     );
   }

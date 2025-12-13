@@ -2,13 +2,11 @@ import { db } from "../firebase.js";
 import Usuario from "../models/Usuario.js";
 import bcrypt from "bcrypt";
 
-/** Convierte docs Firestore → array de Usuario */
 async function fetchUsuarios() {
   const snap = await db.collection("usuarios").get();
   return snap.docs.map(d => Usuario.fromJSON(d.data()));
 }
 
-/** Busca un usuario por ID */
 async function findUsuarioById(id) {
   const snap = await db.collection("usuarios").where("id", "==", id).limit(1).get();
   return snap.empty ? null : { ref: snap.docs[0].ref, data: Usuario.fromJSON(snap.docs[0].data()) };
@@ -53,17 +51,26 @@ export async function obtenerUsuario(req, res) {
   }
 }
 
-
 export async function crearUsuario(req, res) {
   try {
-    const { nombre, rol, password } = req.body;
+    const { nombre, email, rol, password } = req.body;
 
-    if (!nombre || !rol || !password) {
-      return res.status(400).json({ error: "nombre, rol y password son obligatorios" });
+    if (!nombre || !email || !rol || !password) {
+      return res.status(400).json({ error: "nombre, email, rol y password son obligatorios" });
+    }
+
+    const existing = await db
+      .collection("usuarios")
+      .where("email", "==", email.trim())
+      .limit(1)
+      .get();
+
+    if (!existing.empty) {
+      return res.status(400).json({ error: "El email ya está en uso" });
     }
 
     const hash = await bcrypt.hash(password, 10);
-    const nuevo = new Usuario(Date.now(), nombre, rol, hash);
+    const nuevo = new Usuario(Date.now(), nombre.trim(), email.trim(), rol.trim().toLowerCase(), hash);
 
     await db.collection("usuarios").add(nuevo.toJSON());
 
@@ -84,9 +91,10 @@ export async function actualizarUsuario(req, res) {
     }
 
     const { ref, data: usuario } = result;
-    const { nombre, rol, password } = req.body;
+    const { nombre, email, rol, password } = req.body;
 
     if (nombre !== undefined) usuario.nombre = nombre.trim();
+    if (email !== undefined) usuario.email = email.trim();
     if (rol !== undefined) usuario.rol = rol.trim().toLowerCase();
     if (password !== undefined) {
       usuario.passwordHash = await bcrypt.hash(password, 10);
